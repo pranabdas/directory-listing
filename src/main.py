@@ -10,7 +10,10 @@ import datetime as dt
 import subprocess
 from settings import SITE_URL, IGNORE_GIT, BASE_URL, SITE_NAME, FOOTER_TEXT
 
-with open("/src/icons.json", encoding="utf-8") as json_file:
+# Get the absolute path of the directory containing this script (the 'src' folder)
+SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
+
+with open(os.path.join(SCRIPT_DIR, "icons.json"), encoding="utf-8") as json_file:
     data = json.load(json_file)
 
 
@@ -121,7 +124,7 @@ def get_template_head(dirname, SITE_URL, BASE_URL):
     """
     get template head
     """
-    with open("/src/template/head.html", encoding="utf-8") as file:
+    with open(os.path.join(SCRIPT_DIR, "template", "head.html"), encoding="utf-8") as file:
         head = file.read()
 
     if BASE_URL == '.':
@@ -146,7 +149,7 @@ def get_template_foot():
     """
     get template foot
     """
-    with open("/src/template/foot.html", encoding="utf-8") as file:
+    with open(os.path.join(SCRIPT_DIR, "template", "foot.html"), encoding="utf-8") as file:
         foot = file.read()
     footer_text = FOOTER_TEXT.format(year=str(dt.datetime.now().year))
     return foot.format(footer_text=footer_text)
@@ -156,7 +159,8 @@ def get_icon_base64(filename):
     """
     get icon base64
     """
-    with open("/src/png/" + get_icon_from_filename(filename), "rb") as file:
+    icon_path = os.path.join(SCRIPT_DIR, "png", get_icon_from_filename(filename))
+    with open(icon_path, "rb") as file:
         return "data:image/png;base64, " + base64.b64encode(file.read()).decode("ascii")
 
 
