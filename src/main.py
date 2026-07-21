@@ -1,17 +1,20 @@
 #!/usr/local/bin/python3
-"""
-use os package to iterate through files in a directory
-"""
 import os
 import sys
 import json
 import base64
 import datetime as dt
 import subprocess
-from settings import SITE_URL, IGNORE_GIT, BASE_URL, SITE_NAME, FOOTER_TEXT
 
 # Get the absolute path of the directory containing this script (the 'src' folder)
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
+
+# Fetch inputs from environment variables set by action.yml
+SITE_URL = os.environ.get("SITE_URL", "<username>.github.io")
+BASE_URL = os.environ.get("BASE_URL", "<repo-name>")
+IGNORE_GIT = os.environ.get("IGNORE_GIT", "true").lower() == "true"
+SITE_NAME = os.environ.get("SITE_NAME", "")
+FOOTER_TEXT = os.environ.get("FOOTER_TEXT", "Copyright &copy; {year} Pranab Das. All rights reserved.")
 
 with open(os.path.join(SCRIPT_DIR, "icons.json"), encoding="utf-8") as json_file:
     data = json.load(json_file)
@@ -169,13 +172,9 @@ def get_icon_from_filename(filename):
     get icon from filename
     """
     extension = "." + filename.split(".")[-1]
-    # extension = "." + extension
-    # print(extension)
     for i in data:
         if extension in i["extension"]:
-            # print(i["icon"])
             return i["icon"] + ".png"
-    # print("no icon found")
     return "unknown.png"
 
 
