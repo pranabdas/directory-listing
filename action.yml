@@ -1,18 +1,18 @@
 # action.yml
-name: 'Github Pages Directory Listing'
-description: 'Github Action to generate directory listing index for Github Pages'
+name: Github Pages Directory Listing
+description: Github Action to generate directory listing index for Github Pages
 
-author: 'jayanta525'
+author: pranabdas
 branding:
-  color: 'green'
-  icon: 'upload-cloud'
+  color: green
+  icon: upload-cloud
 
 inputs:
   FOLDER:
-    description: 'folder to start index generations'
+    description: folder to start index generations
     required: true
 runs:
-  using: 'docker'
-  image: 'Dockerfile'
+  using: docker
+  image: Dockerfile
   args:
     - ${{ inputs.FOLDER }}
