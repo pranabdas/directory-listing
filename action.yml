@@ -100,6 +100,8 @@ runs:
         export SITE_URL="${INPUT_SITE_URL:-${REPO_OWNER}.github.io}"
         export BASE_URL="${INPUT_BASE_URL:-${REPO_NAME}}"
         python ${{ github.action_path }}/src/main.py ${{ inputs.folder }}/.
+        # Copy favicon.png into the root target directory
+        cp ${{ github.action_path }}/src/png/folder.png $GITHUB_WORKSPACE/${{ inputs.folder }}/favicon.png
       shell: bash
 
     - name: Optimize HTML and CSS
