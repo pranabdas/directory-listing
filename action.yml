@@ -130,11 +130,11 @@ runs:
 
         # Copy 404 template and inject footer + CSS filename
         CURRENT_YEAR=$(date +'%Y')
-        FORMATTED_FOOTER="${FOOTER_TEXT//{year}/$CURRENT_YEAR}"
-        SAFE_FOOTER=$(echo "$FORMATTED_FOOTER" | sed 's/&/\\&/g')
         cp ${{ github.action_path }}/404.liquid "${TARGET_DIR}/404.html"
+        SAFE_FOOTER=$(echo "$FOOTER_TEXT" | sed 's/&/\\&/g')
         sed -i "s|{CSS_FILENAME}|${CSS_FILENAME}|g" "${TARGET_DIR}/404.html"
         sed -i "s|{FOOTER_TEXT}|${SAFE_FOOTER}|g" "${TARGET_DIR}/404.html"
+        sed -i "s|{year}|${CURRENT_YEAR}|g" "${TARGET_DIR}/404.html"
 
         cp ${{ github.action_path }}/src/png/folder.png "${TARGET_DIR}/favicon.png"
 
