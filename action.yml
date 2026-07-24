@@ -1,7 +1,7 @@
 name: 'Directory Listing Generator'
 description: 'A composite action that sets up Python and runs src/main.py to generate directory listings.'
 branding:
-  icon: 'list'
+  icon: 'folder'
   color: 'blue'
 inputs:
   folder:
