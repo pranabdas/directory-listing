@@ -68,7 +68,7 @@ runs:
       run: |
         # Change to the action's directory so Tailwind can scan main.py and HTML templates for classes
         cd ${{ github.action_path }}
-
+        npm i tailwindcss
         # Process the CSS
         npx -y @tailwindcss/cli -i _tailwind.css -o main.css --minify
 
