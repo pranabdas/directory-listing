@@ -16,6 +16,7 @@ SITE_URL = os.environ.get("SITE_URL", "<username>.github.io")
 BASE_URL = os.environ.get("BASE_URL", "<repo-name>")
 SITE_NAME = os.environ.get("SITE_NAME", "")
 FOOTER_TEXT = os.environ.get("FOOTER_TEXT", "Copyright &copy; {year} Pranab Das. All rights reserved.")
+CSS_FILENAME = os.environ.get("CSS_FILENAME", "main.css")
 
 EXCLUDE_STR = os.environ.get("INPUT_EXCLUDE", ".git")
 EXCLUDE_LIST = set([item.strip() for item in EXCLUDE_STR.split(",") if item.strip()])
@@ -34,10 +35,10 @@ def main():
             os.chdir(sys.argv[1])
         except OSError:
             print("Cannot change the current working Directory")
-            sys.exit()
+            sys.exit(1)
     else:
         print("no directory specified")
-        sys.exit()
+        sys.exit(1)
 
     # Process exclusions ONLY in the top-level directory
     for item in EXCLUDE_LIST:
@@ -94,6 +95,10 @@ def main():
                 # sort filenames alphabetically
                 filenames.sort()
                 for filename in filenames:
+                    # Prevent the dynamically generated CSS file from appearing in the directory listing table
+                    if filename == CSS_FILENAME and dirname == ".":
+                        continue
+
                     path = dirname == "." and filename or dirname + "/" + filename
                     f.write(
                         '<tr class="w-1/4 bg-white border-b border-gray-200 hover:bg-gray-50"><th scope="row" class=" py-2 px-2 lg:px-6 font-medium text-gray-900 whitespace-nowrap flex align-middle"><img style="max-width:23px; margin-right:5px" src="'
@@ -141,6 +146,9 @@ def get_template_head(dirname, SITE_URL, BASE_URL):
     """
     with open(os.path.join(SCRIPT_DIR, "template", "head.html"), encoding="utf-8") as file:
         head = file.read()
+
+    # Dynamically inject the newly generated, hashed CSS filename
+    head = head.replace("main.css", CSS_FILENAME)
 
     if BASE_URL == '.':
         ABS_URL = ''
