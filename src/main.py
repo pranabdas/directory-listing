@@ -12,9 +12,10 @@ SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 # Fetch inputs from environment variables set by action.yml
 SITE_URL = os.environ.get("SITE_URL", "<username>.github.io")
 BASE_URL = os.environ.get("BASE_URL", "<repo-name>")
-IGNORE_GIT = os.environ.get("IGNORE_GIT", "true").lower() == "true"
 SITE_NAME = os.environ.get("SITE_NAME", "")
 FOOTER_TEXT = os.environ.get("FOOTER_TEXT", "Copyright &copy; {year} Pranab Das. All rights reserved.")
+EXCLUDE_STR = os.environ.get("INPUT_EXCLUDE", ".git")
+EXCLUDE_LIST = set([item.strip() for item in EXCLUDE_STR.split(",") if item.strip()])
 
 with open(os.path.join(SCRIPT_DIR, "icons.json"), encoding="utf-8") as json_file:
     data = json.load(json_file)
@@ -37,9 +38,8 @@ def main():
         sys.exit()
 
     for dirname, dirnames, filenames in os.walk("."):
-        if IGNORE_GIT:
-            if ".git" in dirnames:
-                dirnames.remove(".git")
+        dirnames[:] = [d for d in dirnames if d not in EXCLUDE_LIST]
+        filenames = [f for f in filenames if f not in EXCLUDE_LIST]
 
         if "index.html" in filenames:
             print("Skipping  : " + dirname + "/index.html already exists")

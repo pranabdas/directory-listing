@@ -7,7 +7,9 @@ Generate Directory Listings for Github Pages using Github Actions.
 
 Add a `.github/workflows/workflow.yml` to the root of your repository.
 ```
+```yaml
 name: directory-listing
+
 on: [push]
 
 jobs:
@@ -16,19 +18,13 @@ jobs:
     name: Directory Listings Index
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          ref: dummy-data    #checkout different branch
+        uses: actions/checkout@v7
 
       - name: Generate Directory Listings
-        uses: jayanta525/github-pages-directory-listing@v4.0.0
+        uses: pranabdas/directory-listing@v1
         with:
-          FOLDER: data      #directory to generate index
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3.0.1
-        with:
-          path: 'data'      # upload generated folder
+          folder: .      # Directory to generate index
+          exclude: '.git, .github, _config.yml' # Comma-separated files/directories to ignore
 
   deploy:
     needs: pages-directory-listing

@@ -14,10 +14,10 @@ inputs:
     description: 'The base path for the directory (defaults to repository name)'
     required: false
     default: ''
-  ignore_git:
-    description: 'Whether to ignore .git folders'
+  exclude:
+    description: 'Comma-separated list of files and directories to ignore'
     required: false
-    default: 'true'
+    default: '.git'
   site_name:
     description: 'The name of the site'
     required: false
@@ -34,20 +34,17 @@ runs:
       uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
       with:
         python-version: '3.14'
-
     - name: Run main.py
       env:
         REPO_OWNER: ${{ github.repository_owner }}
         INPUT_SITE_URL: ${{ inputs.site_url }}
         INPUT_BASE_URL: ${{ inputs.base_url }}
-        IGNORE_GIT: ${{ inputs.ignore_git }}
+        INPUT_EXCLUDE: ${{ inputs.exclude }}
         SITE_NAME: ${{ inputs.site_name }}
         FOOTER_TEXT: ${{ inputs.footer_text }}
       run: |
         REPO_NAME="${GITHUB_REPOSITORY#*/}"
-
         export SITE_URL="${INPUT_SITE_URL:-${REPO_OWNER}.github.io}"
         export BASE_URL="${INPUT_BASE_URL:-${REPO_NAME}}"
-
         python ${{ github.action_path }}/src/main.py ${{ inputs.folder }}/.
       shell: bash
