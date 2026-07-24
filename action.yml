@@ -88,6 +88,7 @@ runs:
         python-version: '3.x'
 
     - name: Run main.py and Setup Jekyll Infrastructure
+      shell: bash
       env:
         REPO_OWNER: ${{ github.repository_owner }}
         INPUT_SITE_URL: ${{ inputs.site_url }}
@@ -136,7 +137,6 @@ EOF
         sed -i "s|{FOOTER_TEXT}|${SAFE_FOOTER}|g" "${TARGET_DIR}/404.html"
 
         cp ${{ github.action_path }}/src/png/folder.png "${TARGET_DIR}/favicon.png"
-      shell: bash
 
     - name: Optimize HTML and CSS
       shell: bash
