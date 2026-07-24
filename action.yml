@@ -27,7 +27,7 @@ inputs:
   footer_text:
     description: 'Text to display in the footer'
     required: false
-    default: 'Copyright &copy; {year}. Built with <a href="https://github.com/pranabdas/directory-listing" target="_blank">github.com/pranabdas/directory-listing</a>.'
+    default: 'Copyright &copy; {year}. Built with <a class="my-auto text-sky-500 hover:text-pink-500" href="https://github.com/pranabdas/directory-listing" target="_blank">directory-listing</a>.'
 
 # --- DEPLOYMENT INPUTS ---
   github_token:
