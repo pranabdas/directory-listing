@@ -147,13 +147,10 @@ def get_template_head(dirname, SITE_URL, BASE_URL):
     with open(os.path.join(SCRIPT_DIR, "template", "head.html"), encoding="utf-8") as file:
         head = file.read()
 
-    # Dynamically inject the newly generated, hashed CSS filename
-    head = head.replace("main.css", CSS_FILENAME)
-
-    if BASE_URL == '.':
+    if BASE_URL == '.' or BASE_URL == '':
         ABS_URL = ''
     else:
-        ABS_URL = "/" + BASE_URL
+        ABS_URL = BASE_URL if BASE_URL.startswith("/") else "/" + BASE_URL
 
     if SITE_NAME != "" and BASE_URL == ".":
         foldername = SITE_NAME + dirname[1:]
@@ -164,7 +161,8 @@ def get_template_head(dirname, SITE_URL, BASE_URL):
         foldername=foldername,
         breadcrumb=generate_breadcrumb(foldername, SITE_NAME),
         SITE_URL=SITE_URL,
-        ABS_URL=ABS_URL
+        ABS_URL=ABS_URL,
+        CSS_FILENAME=CSS_FILENAME
     )
 
 def get_template_foot():
