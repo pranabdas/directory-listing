@@ -138,6 +138,34 @@ runs:
 
         cp ${{ github.action_path }}/src/png/folder.png "${TARGET_DIR}/favicon.png"
 
+    - name: Set up Ruby and Jekyll
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: "3.4"
+
+    - name: Create Gemfile
+      shell: bash
+      run: |
+        TARGET_DIR="$GITHUB_WORKSPACE/${{ inputs.folder }}"
+        cat > "${TARGET_DIR}/Gemfile" <<EOF
+        source 'https://rubygems.org'
+        gem 'jekyll', '~> 4.3'
+        EOF
+
+    - name: Install Jekyll dependencies
+      shell: bash
+      run: |
+        TARGET_DIR="$GITHUB_WORKSPACE/${{ inputs.folder }}"
+        cd "${TARGET_DIR}"
+        bundle install
+
+    - name: Build website using Jekyll
+      shell: bash
+      run: |
+        TARGET_DIR="$GITHUB_WORKSPACE/${{ inputs.folder }}"
+        cd "${TARGET_DIR}"
+        bundle exec jekyll build
+
     - name: Optimize HTML and CSS
       shell: bash
       env:
@@ -145,15 +173,15 @@ runs:
       run: |
         TARGET_DIR="$GITHUB_WORKSPACE/${{ inputs.folder }}"
 
-        # Run PurgeCSS specifically on top-level main-{hash}.css
+        # Run PurgeCSS on the built _site directory
         npx -y purgecss \
           --config ${{ github.action_path }}/purgecss.config.js \
-          --content "${TARGET_DIR}/**/{index,404}.html" \
-          --css "${TARGET_DIR}/${CSS_FILENAME}" \
-          --output "${TARGET_DIR}/${CSS_FILENAME}"
+          --content "${TARGET_DIR}/_site/**/{index,404}.html" \
+          --css "${TARGET_DIR}/_site/${CSS_FILENAME}" \
+          --output "${TARGET_DIR}/_site/${CSS_FILENAME}"
 
-        # Minify ONLY index.html and 404.html files across all directories
-        for file in $(find "${TARGET_DIR}" -type f \( -name 'index.html' -o -name '404.html' \)); do
+        # Minify ONLY index.html and 404.html files across all directories in _site
+        for file in $(find "${TARGET_DIR}/_site" -type f \( -name 'index.html' -o -name '404.html' \)); do
           npx -y html-minifier-terser \
             --collapse-whitespace \
             --minify-css true \
@@ -171,7 +199,7 @@ runs:
       with:
         github_token: ${{ inputs.github_token }}
         personal_token: ${{ inputs.personal_token }}
-        publish_dir: ${{ inputs.publish_dir }}
+        publish_dir: ${{ inputs.folder }}/_site
         external_repository: ${{ inputs.external_repository }}
         publish_branch: ${{ inputs.publish_branch }}
         full_commit_message: ${{ inputs.commit_message }}
