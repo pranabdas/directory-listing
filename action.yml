@@ -130,6 +130,7 @@ EOF
         # Copy 404 template and inject the hashed CSS filename
         cp ${{ github.action_path }}/404.liquid "${TARGET_DIR}/404.html"
         sed -i "s/{CSS_FILENAME}/${CSS_FILENAME}/g" "${TARGET_DIR}/404.html"
+        sed -i "s/{FOOTER_TEXT}/${FOOTER_TEXT}/g" "${TARGET_DIR}/404.html"
 
         # Copy Favicon AFTER main.py
         cp ${{ github.action_path }}/src/png/folder.png "${TARGET_DIR}/favicon.png"
@@ -145,6 +146,7 @@ EOF
         # Run PurgeCSS specifically on top-level main-{hash}.css
         npx -y purgecss \
           --config ${{ github.action_path }}/purgecss.config.js \
+          --content "${TARGET_DIR}/**/{index,404}.html" \
           --css "${TARGET_DIR}/${CSS_FILENAME}" \
           --output "${TARGET_DIR}/${CSS_FILENAME}"
 
