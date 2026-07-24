@@ -3,7 +3,6 @@ description: 'A composite action that sets up Python and runs src/main.py to gen
 branding:
   icon: 'list'
   color: 'blue'
-
 inputs:
   folder:
     description: 'The target directory to process'
@@ -29,6 +28,7 @@ inputs:
     description: 'Text to display in the footer'
     required: false
     default: 'Copyright &copy; {year} Pranab Das. All rights reserved.'
+
 # --- DEPLOYMENT INPUTS ---
   github_token:
     description: 'GITHUB_TOKEN for same-repo deployment'
@@ -41,7 +41,7 @@ inputs:
   publish_dir:
     description: 'Directory to publish'
     required: false
-    default: './_site'
+    default: '.'
   external_repository:
     description: 'External repository to deploy to (e.g., username/repo)'
     required: false

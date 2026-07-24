@@ -1,10 +1,12 @@
 #!/usr/local/bin/python3
+
 import os
 import sys
 import json
 import base64
 import datetime as dt
 import subprocess
+import shutil
 
 # Get the absolute path of the directory containing this script (the 'src' folder)
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -14,12 +16,12 @@ SITE_URL = os.environ.get("SITE_URL", "<username>.github.io")
 BASE_URL = os.environ.get("BASE_URL", "<repo-name>")
 SITE_NAME = os.environ.get("SITE_NAME", "")
 FOOTER_TEXT = os.environ.get("FOOTER_TEXT", "Copyright &copy; {year} Pranab Das. All rights reserved.")
+
 EXCLUDE_STR = os.environ.get("INPUT_EXCLUDE", ".git")
 EXCLUDE_LIST = set([item.strip() for item in EXCLUDE_STR.split(",") if item.strip()])
 
 with open(os.path.join(SCRIPT_DIR, "icons.json"), encoding="utf-8") as json_file:
     data = json.load(json_file)
-
 
 def main():
     """
@@ -88,6 +90,7 @@ def main():
                         + get_file_modified_time(dirname + "/" + subdirname)
                         + "</td></tr>\n"
                     )
+
                 # sort filenames alphabetically
                 filenames.sort()
                 for filename in filenames:
@@ -109,7 +112,6 @@ def main():
 
                 f.write("\n".join([get_template_foot()]))
 
-
 def get_file_size(filepath):
     """
     get file size
@@ -124,7 +126,6 @@ def get_file_size(filepath):
     else:
         return str(round((size / 1024 / 1024 / 1024), 2)) + " GB"
 
-
 def get_file_modified_time(filepath):
     """
     get file modified time
@@ -133,7 +134,6 @@ def get_file_modified_time(filepath):
     return subprocess.check_output(git_cmd, shell=True).decode("utf-8") or dt.datetime.fromtimestamp(
         os.path.getmtime(filepath)
     ).strftime("%d-%b-%Y %H:%M") or "??"
-
 
 def get_template_head(dirname, SITE_URL, BASE_URL):
     """
@@ -159,7 +159,6 @@ def get_template_head(dirname, SITE_URL, BASE_URL):
         ABS_URL=ABS_URL
     )
 
-
 def get_template_foot():
     """
     get template foot
@@ -169,7 +168,6 @@ def get_template_foot():
     footer_text = FOOTER_TEXT.format(year=str(dt.datetime.now().year))
     return foot.format(footer_text=footer_text)
 
-
 def get_icon_base64(filename):
     """
     get icon base64
@@ -177,7 +175,6 @@ def get_icon_base64(filename):
     icon_path = os.path.join(SCRIPT_DIR, "png", get_icon_from_filename(filename))
     with open(icon_path, "rb") as file:
         return "data:image/png;base64, " + base64.b64encode(file.read()).decode("ascii")
-
 
 def get_icon_from_filename(filename):
     """
@@ -189,13 +186,10 @@ def get_icon_from_filename(filename):
             return i["icon"] + ".png"
     return "unknown.png"
 
-
 def generate_breadcrumb(input_dir, site_name=""):
     dir_items = str(input_dir).split("/")
-
     # remove empty items
     dir_items_cleaned = list(filter(None, dir_items))
-
     url = ""
     result = ""
     for index, item in enumerate(dir_items_cleaned):
@@ -205,14 +199,11 @@ def generate_breadcrumb(input_dir, site_name=""):
             url += item
         else:
             url += "/" + item
-
         if index < len(dir_items_cleaned) - 1:
             result += f'<a class="text-sky-500 hover:text-pink-500" href="{url}">{item}</a>' + "/"
         else:
             result += '<span class="text-slate-500">' + item + "</span>"
-
     return result
-
 
 if __name__ == "__main__":
     main()

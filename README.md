@@ -6,9 +6,7 @@ Generate Directory Listings for Github Pages and deploy them automatically using
 
 ### Getting Started (Same Repository)
 
-Add a `.github/workflows/workflow.yml` to the root of your repository.
-
-By default, the action will automatically generate the directory listing and push it to the `gh-pages` branch of the **same repository** using the default built-in `GITHUB_TOKEN`.
+Add a `.github/workflows/workflow.yml` to the root of your repository. By default, the action will automatically generate the directory listing and push it to the `gh-pages` branch of the **same repository** using the default built-in `GITHUB_TOKEN`.
 
 ```yaml
 name: directory-listing
