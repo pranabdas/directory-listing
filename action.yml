@@ -104,6 +104,8 @@ runs:
 
     - name: Optimize HTML and CSS
       shell: bash
+      env:
+        CSS_FILENAME: ${{ env.CSS_FILENAME }}
       run: |
         TARGET_DIR="$GITHUB_WORKSPACE/${{ inputs.folder }}"
 

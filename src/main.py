@@ -150,7 +150,8 @@ def get_template_head(dirname, SITE_URL, BASE_URL):
     if BASE_URL == '.' or BASE_URL == '':
         ABS_URL = ''
     else:
-        ABS_URL = BASE_URL if BASE_URL.startswith("/") else "/" + BASE_URL
+        clean_base = BASE_URL.strip('/')
+        ABS_URL = f"/{clean_base}/" if clean_base else ''
 
     if SITE_NAME != "" and BASE_URL == ".":
         foldername = SITE_NAME + dirname[1:]
