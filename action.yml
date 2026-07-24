@@ -120,13 +120,13 @@ runs:
         fi
 
         # 3. Write _config.yml AFTER main.py
-        cat <<EOF > "${TARGET_DIR}/_config.yml"
-url: "${FULL_SITE_URL}"
-baseurl: "${FORMATTED_BASEURL}"
-exclude:
-  - Gemfile
-  - Gemfile.lock
-EOF
+        cat > "${TARGET_DIR}/_config.yml" <<EOF
+        url: "${FULL_SITE_URL}"
+        baseurl: "${FORMATTED_BASEURL}"
+        exclude:
+          - Gemfile
+          - Gemfile.lock
+        EOF
 
         # Copy 404 template and inject footer + CSS filename
         CURRENT_YEAR=$(date +'%Y')
