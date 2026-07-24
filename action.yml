@@ -87,7 +87,7 @@ runs:
       with:
         python-version: '3.x'
 
-    - name: Run main.py
+    - name: Run main.py and Setup Jekyll Infrastructure
       env:
         REPO_OWNER: ${{ github.repository_owner }}
         INPUT_SITE_URL: ${{ inputs.site_url }}
@@ -95,13 +95,44 @@ runs:
         INPUT_EXCLUDE: ${{ inputs.exclude }}
         SITE_NAME: ${{ inputs.site_name }}
         FOOTER_TEXT: ${{ inputs.footer_text }}
+        CSS_FILENAME: ${{ env.CSS_FILENAME }}
       run: |
         REPO_NAME="${GITHUB_REPOSITORY#*/}"
         export SITE_URL="${INPUT_SITE_URL:-${REPO_OWNER}.github.io}"
         export BASE_URL="${INPUT_BASE_URL:-${REPO_NAME}}"
-        python ${{ github.action_path }}/src/main.py ${{ inputs.folder }}/.
-        # Copy favicon.png into the root target directory
-        cp ${{ github.action_path }}/src/png/folder.png $GITHUB_WORKSPACE/${{ inputs.folder }}/favicon.png
+        TARGET_DIR="$GITHUB_WORKSPACE/${{ inputs.folder }}"
+
+        # 1. Run main.py FIRST (Generates index.html files across directories)
+        python ${{ github.action_path }}/src/main.py "${TARGET_DIR}"
+
+        # 2. Setup dynamic URLs for Jekyll _config.yml
+        FULL_SITE_URL="$SITE_URL"
+        if [[ ! "$FULL_SITE_URL" =~ ^https?:// ]]; then
+          FULL_SITE_URL="https://${FULL_SITE_URL}"
+        fi
+
+        CLEAN_BASE=$(echo "$BASE_URL" | sed -e 's/^\///' -e 's/\/$//')
+        if [ -n "$CLEAN_BASE" ] && [ "$CLEAN_BASE" != "." ]; then
+          FORMATTED_BASEURL="/${CLEAN_BASE}"
+        else
+          FORMATTED_BASEURL=""
+        fi
+
+        # 3. Write _config.yml AFTER main.py
+        cat <<EOF > "${TARGET_DIR}/_config.yml"
+url: "${FULL_SITE_URL}"
+baseurl: "${FORMATTED_BASEURL}"
+exclude:
+  - Gemfile
+  - Gemfile.lock
+EOF
+
+        # Copy 404 template and inject the hashed CSS filename
+        cp ${{ github.action_path }}/404.liquid "${TARGET_DIR}/404.html"
+        sed -i "s/{CSS_FILENAME}/${CSS_FILENAME}/g" "${TARGET_DIR}/404.html"
+
+        # Copy Favicon AFTER main.py
+        cp ${{ github.action_path }}/src/png/folder.png "${TARGET_DIR}/favicon.png"
       shell: bash
 
     - name: Optimize HTML and CSS
