@@ -139,7 +139,7 @@ runs:
         cp ${{ github.action_path }}/src/png/folder.png "${TARGET_DIR}/favicon.png"
 
     - name: Set up Ruby and Jekyll
-      uses: ruby/setup-ruby@v1
+      uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
       with:
         ruby-version: "3.4"
 
