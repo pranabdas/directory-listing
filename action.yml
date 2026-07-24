@@ -27,7 +27,7 @@ inputs:
   footer_text:
     description: 'Text to display in the footer'
     required: false
-    default: 'Copyright &copy; {year} Pranab Das. All rights reserved.'
+    default: 'Copyright &copy; {year}. Built with <a href="https://github.com/pranabdas/directory-listing" target="_blank">github.com/pranabdas/directory-listing</a>.'
 
 # --- DEPLOYMENT INPUTS ---
   github_token:

@@ -29,7 +29,7 @@ jobs:
         uses: pranabdas/directory-listing@v1
         with:
           folder: .
-          exclude: '.git, .github, _config.yml'
+          exclude: '.git,.github,_config.yml'
 ```
 
 ### Deploy to an External Repository
@@ -39,7 +39,7 @@ jobs:
         uses: pranabdas/directory-listing@v1
         with:
           folder: .
-          exclude: '.git, .github, _config.yml'
+          exclude: '.git,.github,_config.yml'
           personal_token: ${{ secrets.DEPLOY_KEY_DRIVE }}
           external_repository: pranabdas/drive
           publish_branch: main
@@ -54,7 +54,7 @@ jobs:
 | `site_url` | The base URL for the site | false | `<repository_owner>.github.io` |
 | `base_url` | The base path for the directory | false | `<repository_name>` |
 | `site_name` | The name of the site | false | `""` (Empty string) |
-| `footer_text` | Text to display in the footer (Supports `{year}`) | false | `Copyright &copy; {year} Pranab Das. All rights reserved.` |
+| `footer_text` | Text to display in the footer (Supports `{year}`) | false | `Copyright &copy; {year}. Built with <a href="https://github.com/pranabdas/directory-listing" target="_blank">github.com/pranabdas/directory-listing</a>.` |
 | `github_token` | `GITHUB_TOKEN` for same-repo deployment | false | `${{ github.token }}` |
 | `personal_token` | Personal access token for external repository deployment | false | `""` (Empty string) |
 | `publish_dir` | Directory to publish | false | `.` |
