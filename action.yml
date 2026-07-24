@@ -102,6 +102,31 @@ runs:
         python ${{ github.action_path }}/src/main.py ${{ inputs.folder }}/.
       shell: bash
 
+    - name: Optimize HTML and CSS
+      shell: bash
+      run: |
+        TARGET_DIR="$GITHUB_WORKSPACE/${{ inputs.folder }}"
+
+        # Run PurgeCSS specifically on top-level main-{hash}.css
+        npx -y purgecss \
+          --config ${{ github.action_path }}/purgecss.config.js \
+          --css "${TARGET_DIR}/${CSS_FILENAME}" \
+          --output "${TARGET_DIR}/${CSS_FILENAME}"
+
+        # Minify ONLY index.html and 404.html files across all directories
+        for file in $(find "${TARGET_DIR}" -type f \( -name 'index.html' -o -name '404.html' \)); do
+          npx -y html-minifier-terser \
+            --collapse-whitespace \
+            --minify-css true \
+            --minify-js true \
+            --remove-comments \
+            --no-newlines-before-tag-close \
+            --output "${file}" "${file}"
+
+          # Append a trailing newline
+          echo "" >> "${file}"
+        done
+
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453 # v4.1.0
       with:
