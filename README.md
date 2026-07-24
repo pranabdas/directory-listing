@@ -1,108 +1,65 @@
 # Github Pages Directory Listing
-[![main](https://github.com/jayanta525/github-pages-directory-listing/actions/workflows/main.yml/badge.svg)](https://github.com/jayanta525/github-pages-directory-listing/actions/workflows/main.yml)
-[![license](https://img.shields.io/github/license/jayanta525/github-pages-directory-listing)](https://github.com/jayanta525/github-pages-directory-listing/blob/main/LICENSE)
-[![Paypal Donate](https://img.shields.io/badge/donate-paypal-00457c.svg?logo=paypal&style=plastic)](https://www.paypal.me/jayanta525)
 
+Generate Directory Listings for Github Pages and deploy them automatically using Github Actions.
 
-Generate Directory Listings for Github Pages using Github Actions. 
-
-[Demo](https://github.com/jayanta525/github-pages-directory-listing#demo)
-
-[Read about pages deployment action](https://github.com/jayanta525/github-pages-directory-listing/edit/main/README.md#note)
-
-[action.yml/workflow.yml](https://github.com/jayanta525/github-pages-directory-listing/blob/main/.github/workflows/main.yml)
 ## Usage
-### Getting Started
 
-Add a `.github/workflows/workflow.yml` to the root of your repository.
-```
+### Getting Started (Same Repository)
+
+Add a `.github/workflows/workflow.yml` to the root of your repository. By default, the action will automatically generate the directory listing and push it to the `gh-pages` branch of the **same repository** using the default built-in `GITHUB_TOKEN`.
+
+```yaml
 name: directory-listing
-on: [push]
+
+on:
+  push:
+    branches:
+      - main
 
 jobs:
-  pages-directory-listing:
+  build-and-deploy:
     runs-on: ubuntu-latest
-    name: Directory Listings Index
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          ref: dummy-data    #checkout different branch
-
-      - name: Generate Directory Listings
-        uses: jayanta525/github-pages-directory-listing@v4.0.0
-        with:
-          FOLDER: data      #directory to generate index
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3.0.1
-        with:
-          path: 'data'      # upload generated folder
-  
-  deploy:
-    needs: pages-directory-listing
     permissions:
-      pages: write      # to deploy to Pages
-      id-token: write   # to verify the deployment originates from an appropriate source
-
-    # Deploy to the github-pages environment
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    # Specify runner + deployment step
-    runs-on: ubuntu-latest
+      contents: write # Required to push to the gh-pages branch
     steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4.0.0
-```
-
-### Options
-#### Checkout different branch
-```
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
-          ref: dummy-data    #checkout different branch
-```
-#### Checkout different repository
-```
-      - name: Checkout tools repo
-        uses: actions/checkout@v4
+          fetch-depth: 0  # IMPORTANT: Fetches full history so git log can find real timestamps
+
+      - name: Generate and Deploy Directory Listings
+        uses: pranabdas/directory-listing@v1
         with:
-          repository: my-org/my-tools     #repo public url
-          path: my-tools                  #folder to clone to
-          ref: branch-name               #branch to clone
+          folder: .
+          exclude: '.git,.github,_config.yml'
 ```
-#### Choosing a folder to generate indexing
-```
-      - name: Generate Directory Listings
-        uses: jayanta525/github-pages-directory-listing@v4.0.0
+
+### Deploy to an External Repository
+
+```yaml
+- name: Generate and Deploy Directory Listings
+        uses: pranabdas/directory-listing@v1
         with:
-          FOLDER: data    #directory to generate index
+          folder: .
+          exclude: '.git,.github,_config.yml'
+          personal_token: ${{ secrets.DEPLOY_KEY_DRIVE }}
+          external_repository: pranabdas/drive
+          publish_branch: main
 ```
-#### Refer here for more options: https://github.com/marketplace/actions/checkout
 
-## Note
+### Action Inputs (Options)
 
-This action uses Github's own pages deploy action. No gh-pages branch is required.
-Under `Settings > Pages > Build & Deployment` 
-
-![image](https://user-images.githubusercontent.com/30702133/226170702-74f11cba-aad2-44ca-9dc5-9f73efd76b41.png)
-
-
-
-## Demo
-demo URL: https://jayanta525.github.io/github-pages-directory-listing/
-
-
-### Desktop view
-
-![image](https://user-images.githubusercontent.com/30702133/226169193-66c27c81-fdc7-499d-88e4-1a1c8571ecce.png)
-
-### Mobile View
-
-![image](https://user-images.githubusercontent.com/30702133/226169252-b74d3a40-7928-4804-bd66-8292a6259531.png)
-
-
+| Input | Description | Required | Default |
+| :--- | :--- | :--- | :--- |
+| `folder` | The target directory to process | false | `.` |
+| `exclude` | Comma-separated list of files and directories to ignore | false | `.git` |
+| `site_url` | The base URL for the site | false | `<repository_owner>.github.io` |
+| `base_url` | The base path for the directory | false | `<repository_name>` |
+| `site_name` | The name of the site | false | `""` (Empty string) |
+| `footer_text` | Text to display in the footer (Supports `{year}`) | false | `Copyright &copy; {year}. Built with <a href="https://github.com/pranabdas/directory-listing" target="_blank">github.com/pranabdas/directory-listing</a>.` |
+| `github_token` | `GITHUB_TOKEN` for same-repo deployment | false | `${{ github.token }}` |
+| `personal_token` | Personal access token for external repository deployment | false | `""` (Empty string) |
+| `publish_dir` | Directory to publish | false | `.` |
+| `external_repository` | External repository to deploy to (e.g., `username/repo`) | false | `""` (Empty string) |
+| `publish_branch` | Branch to deploy to | false | `gh-pages` |
+| `commit_message` | Commit message for the deployment | false | `deploy ref. ${{ github.sha }}` |

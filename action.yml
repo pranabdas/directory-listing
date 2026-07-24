@@ -1,18 +1,207 @@
-# action.yml
-name: 'Github Pages Directory Listing'
-description: 'Github Action to generate directory listing index for Github Pages'
-
-author: 'jayanta525'
+name: 'Directory Listing Generator'
+description: 'A composite action that sets up Python and runs src/main.py to generate directory listings.'
 branding:
-  color: 'green'
-  icon: 'upload-cloud'
-
+  icon: 'folder'
+  color: 'blue'
 inputs:
-  FOLDER:
-    description: 'folder to start index generations'
-    required: true
+  folder:
+    description: 'The target directory to process'
+    required: false
+    default: '.'
+  site_url:
+    description: 'The base URL for the site (defaults to <repository_owner>.github.io)'
+    required: false
+    default: ''
+  base_url:
+    description: 'The base path for the directory (defaults to repository name)'
+    required: false
+    default: ''
+  exclude:
+    description: 'Comma-separated list of files and directories to ignore'
+    required: false
+    default: '.git,.gitignore'
+  site_name:
+    description: 'The name of the site'
+    required: false
+    default: ''
+  footer_text:
+    description: 'Text to display in the footer'
+    required: false
+    default: 'Copyright &copy; {year}. Built with <a href="https://github.com/pranabdas/directory-listing" target="_blank">github.com/pranabdas/directory-listing</a>.'
+
+# --- DEPLOYMENT INPUTS ---
+  github_token:
+    description: 'GITHUB_TOKEN for same-repo deployment'
+    required: false
+    default: ${{ github.token }}
+  personal_token:
+    description: 'Personal access token for external repository deployment'
+    required: false
+    default: ''
+  publish_dir:
+    description: 'Directory to publish'
+    required: false
+    default: '.'
+  external_repository:
+    description: 'External repository to deploy to (e.g., username/repo)'
+    required: false
+    default: ''
+  publish_branch:
+    description: 'Branch to deploy to'
+    required: false
+    default: 'gh-pages'
+  commit_message:
+    description: 'Commit message for the deployment'
+    required: false
+    default: 'deploy ref. ${{ github.sha }}'
+
 runs:
-  using: 'docker'
-  image: 'Dockerfile'
-  args:
-    - ${{ inputs.FOLDER }}
+  using: "composite"
+  steps:
+    - name: Set up Node.js
+      uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      with:
+        node-version: "lts/*"
+
+    - name: Process tailwindcss
+      shell: bash
+      run: |
+        # Change to the action's directory so Tailwind can scan main.py and HTML templates for classes
+        cd ${{ github.action_path }}
+        npm i tailwindcss
+        # Process the CSS
+        npx -y @tailwindcss/cli -i _tailwind.css -o main.css --minify
+
+        # Hash the output file
+        CSS_HASH=$(md5sum main.css | cut -c 1-6)
+        CSS_FILENAME="main-${CSS_HASH}.css"
+
+        # Move the hashed file into the target folder inside the user's workspace
+        mv main.css $GITHUB_WORKSPACE/${{ inputs.folder }}/${CSS_FILENAME}
+
+        # Make the filename available to main.py
+        echo "CSS_FILENAME=$CSS_FILENAME" >> $GITHUB_ENV
+
+    - name: Set up Python
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      with:
+        python-version: '3.x'
+
+    - name: Run main.py and Setup Jekyll Infrastructure
+      shell: bash
+      env:
+        REPO_OWNER: ${{ github.repository_owner }}
+        INPUT_SITE_URL: ${{ inputs.site_url }}
+        INPUT_BASE_URL: ${{ inputs.base_url }}
+        INPUT_EXCLUDE: ${{ inputs.exclude }}
+        SITE_NAME: ${{ inputs.site_name }}
+        FOOTER_TEXT: ${{ inputs.footer_text }}
+        CSS_FILENAME: ${{ env.CSS_FILENAME }}
+      run: |
+        REPO_NAME="${GITHUB_REPOSITORY#*/}"
+        export SITE_URL="${INPUT_SITE_URL:-${REPO_OWNER}.github.io}"
+        export BASE_URL="${INPUT_BASE_URL:-${REPO_NAME}}"
+        TARGET_DIR="$GITHUB_WORKSPACE/${{ inputs.folder }}"
+
+        # 1. Run main.py FIRST (Generates index.html files across directories)
+        python ${{ github.action_path }}/src/main.py "${TARGET_DIR}"
+
+        # 2. Setup dynamic URLs for Jekyll _config.yml
+        FULL_SITE_URL="$SITE_URL"
+        if [[ ! "$FULL_SITE_URL" =~ ^https?:// ]]; then
+          FULL_SITE_URL="https://${FULL_SITE_URL}"
+        fi
+
+        CLEAN_BASE=$(echo "$BASE_URL" | sed -e 's/^\///' -e 's/\/$//')
+        if [ -n "$CLEAN_BASE" ] && [ "$CLEAN_BASE" != "." ]; then
+          FORMATTED_BASEURL="/${CLEAN_BASE}"
+        else
+          FORMATTED_BASEURL=""
+        fi
+
+        # 3. Write _config.yml AFTER main.py
+        cat > "${TARGET_DIR}/_config.yml" <<EOF
+        url: "${FULL_SITE_URL}"
+        baseurl: "${FORMATTED_BASEURL}"
+        exclude:
+          - Gemfile
+          - Gemfile.lock
+        EOF
+
+        # Copy 404 template and inject footer + CSS filename
+        CURRENT_YEAR=$(date +'%Y')
+        cp ${{ github.action_path }}/404.liquid "${TARGET_DIR}/404.html"
+        SAFE_FOOTER=$(echo "$FOOTER_TEXT" | sed 's/&/\\&/g')
+        sed -i "s|{CSS_FILENAME}|${CSS_FILENAME}|g" "${TARGET_DIR}/404.html"
+        sed -i "s|{FOOTER_TEXT}|${SAFE_FOOTER}|g" "${TARGET_DIR}/404.html"
+        sed -i "s|{year}|${CURRENT_YEAR}|g" "${TARGET_DIR}/404.html"
+
+        cp ${{ github.action_path }}/src/png/folder.png "${TARGET_DIR}/favicon.png"
+
+    - name: Set up Ruby and Jekyll
+      uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
+      with:
+        ruby-version: "3.4"
+
+    - name: Create Gemfile
+      shell: bash
+      run: |
+        TARGET_DIR="$GITHUB_WORKSPACE/${{ inputs.folder }}"
+        cat > "${TARGET_DIR}/Gemfile" <<EOF
+        source 'https://rubygems.org'
+        gem 'jekyll', '~> 4.3'
+        EOF
+
+    - name: Install Jekyll dependencies
+      shell: bash
+      run: |
+        TARGET_DIR="$GITHUB_WORKSPACE/${{ inputs.folder }}"
+        cd "${TARGET_DIR}"
+        bundle install
+
+    - name: Build website using Jekyll
+      shell: bash
+      run: |
+        TARGET_DIR="$GITHUB_WORKSPACE/${{ inputs.folder }}"
+        cd "${TARGET_DIR}"
+        bundle exec jekyll build
+
+    - name: Optimize HTML and CSS
+      shell: bash
+      env:
+        CSS_FILENAME: ${{ env.CSS_FILENAME }}
+      run: |
+        TARGET_DIR="$GITHUB_WORKSPACE/${{ inputs.folder }}"
+
+        # Run PurgeCSS on the built _site directory
+        npx -y purgecss \
+          --config ${{ github.action_path }}/purgecss.config.js \
+          --content "${TARGET_DIR}/_site/**/{index,404}.html" \
+          --css "${TARGET_DIR}/_site/${CSS_FILENAME}" \
+          --output "${TARGET_DIR}/_site/${CSS_FILENAME}"
+
+        # Minify ONLY index.html and 404.html files across all directories in _site
+        for file in $(find "${TARGET_DIR}/_site" -type f \( -name 'index.html' -o -name '404.html' \)); do
+          npx -y html-minifier-terser \
+            --collapse-whitespace \
+            --minify-css true \
+            --minify-js true \
+            --remove-comments \
+            --no-newlines-before-tag-close \
+            --output "${file}" "${file}"
+
+          # Append a trailing newline
+          echo "" >> "${file}"
+        done
+
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453 # v4.1.0
+      with:
+        github_token: ${{ inputs.github_token }}
+        personal_token: ${{ inputs.personal_token }}
+        publish_dir: ${{ inputs.folder }}/_site
+        external_repository: ${{ inputs.external_repository }}
+        publish_branch: ${{ inputs.publish_branch }}
+        full_commit_message: ${{ inputs.commit_message }}
+        user_name: "github-actions[bot]"
+        user_email: "github-actions[bot]@users.noreply.github.com"

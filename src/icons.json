@@ -2,13 +2,14 @@
     {
         "icon": "archive",
         "extension": [
-            ".zip",
             ".7z",
             ".bz2",
             ".cab",
             ".gz",
+            ".rar",
             ".tar",
-            ".rar"
+            ".tgz",
+            ".zip"
         ]
     },
     {

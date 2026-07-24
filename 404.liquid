@@ -1,0 +1,57 @@
+---
+permalink: /404.html
+---
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Page Not Found | {{ site.title | default: "404" }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" type="image/png" href="{{ site.baseurl }}/favicon.png" />
+    <link href="{{ site.baseurl }}/{CSS_FILENAME}" rel="stylesheet" />
+    <script>
+        var jekyllPages = [];
+        {% for post in site.posts %}jekyllPages.push("{{ site.url }}{{ site.baseurl }}{{ post.url }}");
+        {% endfor %}
+        {% for page in site.pages %}jekyllPages.push("{{ site.url }}{{ site.baseurl }}{{ page.url }}");
+        {% endfor %}
+        {% for item in site.static_files %}jekyllPages.push("{{ site.url }}{{ site.baseurl }}{{ item.path }}");
+        {% endfor %}
+        for (let jj = 0; jj < jekyllPages.length; jj++) {
+            if (jekyllPages[jj].slice(-1) === "/") {
+                jekyllPages[jj] = jekyllPages[jj].slice(0, -1);
+            }
+            if (jekyllPages[jj].slice(-11).toLowerCase() === "/index.html"){
+                jekyllPages[jj] = jekyllPages[jj].slice(0, -11);
+            }
+        }
+        function jekyllFixCaseSensitiveUrl() {
+            let url = window.location.toString();
+            if (url.slice(-1) === "/"){
+                url = url.slice(0, -1);
+            }
+            if (url.slice(-11).toLowerCase() === "/index.html") {
+                url = url.slice(0, -11);
+            }
+            let pageList = jekyllPages.map(function(value) {
+                return value.toLowerCase();
+            });
+            let i = pageList.indexOf(url.toLowerCase());
+            if (i !== -1) {
+                window.location = jekyllPages[i];
+            }
+        }
+        if (window.location.toString().toLowerCase() !== "{{ site.url }}{{ site.baseurl }}/404.html") {
+            window.onload = jekyllFixCaseSensitiveUrl;
+        }
+    </script>
+</head>
+<body>
+    <div class="m-2 lg:m-4"><span class="font-bold tracking-wide text-2xl text-gray-700">Page Not Found (Error 404)</span></div>
+    <div class="overflow-x-auto relative shadow-md sm:rounded-lg m-2 lg:m-4 text-slate-700">
+        <p class="m-4 mt-10 mb-10 text-pink-500 italic">Sorry! The page you requested could not be found. Go back to the <a style="cursor: pointer;" onclick="history.back()" class="my-auto text-sky-500">previous</a> page, or go to the <a class="my-auto text-sky-500" href="{{ site.baseurl }}/">home</a> directory of this website.</p>
+    </div>
+    <footer>
+        <p class="m-2 lg:m-4 text-sm text-center text-slate-400">{FOOTER_TEXT}</p>
+    </footer>
+</body>
+</html>
