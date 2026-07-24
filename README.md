@@ -1,71 +1,65 @@
 # Github Pages Directory Listing
 
-Generate Directory Listings for Github Pages using Github Actions.
+Generate Directory Listings for Github Pages and deploy them automatically using Github Actions.
 
 ## Usage
-### Getting Started
+
+### Getting Started (Same Repository)
 
 Add a `.github/workflows/workflow.yml` to the root of your repository.
-```
+
+By default, the action will automatically generate the directory listing and push it to the `gh-pages` branch of the **same repository** using the default built-in `GITHUB_TOKEN`.
+
 ```yaml
 name: directory-listing
 
-on: [push]
+on:
+  push:
+    branches:
+      - main
 
 jobs:
-  pages-directory-listing:
+  build-and-deploy:
     runs-on: ubuntu-latest
-    name: Directory Listings Index
+    permissions:
+      contents: write # Required to push to the gh-pages branch
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v7
 
-      - name: Generate Directory Listings
+      - name: Generate and Deploy Directory Listings
         uses: pranabdas/directory-listing@v1
         with:
-          folder: .      # Directory to generate index
-          exclude: '.git, .github, _config.yml' # Comma-separated files/directories to ignore
-
-  deploy:
-    needs: pages-directory-listing
-    permissions:
-      pages: write      # to deploy to Pages
-      id-token: write   # to verify the deployment originates from an appropriate source
-
-    # Deploy to the github-pages environment
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    # Specify runner + deployment step
-    runs-on: ubuntu-latest
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4.0.0
+          folder: .
+          exclude: '.git, .github, _config.yml'
 ```
 
-### Options
-#### Checkout different branch
-```
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+### Deploy to an External Repository
+
+```yaml
+- name: Generate and Deploy Directory Listings
+        uses: pranabdas/directory-listing@v1
         with:
-          ref: dummy-data    #checkout different branch
+          folder: .
+          exclude: '.git, .github, _config.yml'
+          personal_token: ${{ secrets.DEPLOY_KEY_DRIVE }}
+          external_repository: pranabdas/drive
+          publish_branch: main
 ```
-#### Checkout different repository
-```
-      - name: Checkout tools repo
-        uses: actions/checkout@v4
-        with:
-          repository: my-org/my-tools     #repo public url
-          path: my-tools                  #folder to clone to
-          ref: branch-name               #branch to clone
-```
-#### Choosing a folder to generate indexing
-```
-      - name: Generate Directory Listings
-        uses: jayanta525/github-pages-directory-listing@v4.0.0
-        with:
-          FOLDER: data    #directory to generate index
-```
+
+### Action Inputs (Options)
+
+| Input | Description | Required | Default |
+| :--- | :--- | :--- | :--- |
+| `folder` | The target directory to process | false | `.` |
+| `exclude` | Comma-separated list of files and directories to ignore | false | `.git` |
+| `site_url` | The base URL for the site | false | `<repository_owner>.github.io` |
+| `base_url` | The base path for the directory | false | `<repository_name>` |
+| `site_name` | The name of the site | false | `""` (Empty string) |
+| `footer_text` | Text to display in the footer (Supports `{year}`) | false | `Copyright &copy; {year} Pranab Das. All rights reserved.` |
+| `github_token` | `GITHUB_TOKEN` for same-repo deployment | false | `${{ github.token }}` |
+| `personal_token` | Personal access token for external repository deployment | false | `""` (Empty string) |
+| `publish_dir` | Directory to publish | false | `.` |
+| `external_repository` | External repository to deploy to (e.g., `username/repo`) | false | `""` (Empty string) |
+| `publish_branch` | Branch to deploy to | false | `gh-pages` |
+| `commit_message` | Commit message for the deployment | false | `deploy ref. ${{ github.sha }}` |

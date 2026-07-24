@@ -1,5 +1,8 @@
 name: 'Directory Listing Generator'
 description: 'A composite action that sets up Python and runs src/main.py to generate directory listings.'
+branding:
+  icon: 'list'
+  color: 'blue'
 
 inputs:
   folder:
@@ -26,6 +29,31 @@ inputs:
     description: 'Text to display in the footer'
     required: false
     default: 'Copyright &copy; {year} Pranab Das. All rights reserved.'
+# --- DEPLOYMENT INPUTS ---
+  github_token:
+    description: 'GITHUB_TOKEN for same-repo deployment'
+    required: false
+    default: ${{ github.token }}
+  personal_token:
+    description: 'Personal access token for external repository deployment'
+    required: false
+    default: ''
+  publish_dir:
+    description: 'Directory to publish'
+    required: false
+    default: './_site'
+  external_repository:
+    description: 'External repository to deploy to (e.g., username/repo)'
+    required: false
+    default: ''
+  publish_branch:
+    description: 'Branch to deploy to'
+    required: false
+    default: 'gh-pages'
+  commit_message:
+    description: 'Commit message for the deployment'
+    required: false
+    default: 'deploy ref. ${{ github.sha }}'
 
 runs:
   using: "composite"
@@ -48,3 +76,14 @@ runs:
         export BASE_URL="${INPUT_BASE_URL:-${REPO_NAME}}"
         python ${{ github.action_path }}/src/main.py ${{ inputs.folder }}/.
       shell: bash
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453 # v4.1.0
+      with:
+        github_token: ${{ inputs.github_token }}
+        personal_token: ${{ inputs.personal_token }}
+        publish_dir: ${{ inputs.publish_dir }}
+        external_repository: ${{ inputs.external_repository }}
+        publish_branch: ${{ inputs.publish_branch }}
+        full_commit_message: ${{ inputs.commit_message }}
+        user_name: "github-actions[bot]"
+        user_email: "github-actions[bot]@users.noreply.github.com"

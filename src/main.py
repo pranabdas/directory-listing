@@ -37,10 +37,22 @@ def main():
         print("no directory specified")
         sys.exit()
 
-    for dirname, dirnames, filenames in os.walk("."):
-        dirnames[:] = [d for d in dirnames if d not in EXCLUDE_LIST]
-        filenames = [f for f in filenames if f not in EXCLUDE_LIST]
+    # Process exclusions ONLY in the top-level directory
+    for item in EXCLUDE_LIST:
+        if os.path.exists(item):
+            if os.path.isdir(item):
+                print(f"Removing excluded directory: {item}")
+                shutil.rmtree(item, ignore_errors=True)
+            elif os.path.isfile(item):
+                print(f"Removing excluded file: {item}")
+                try:
+                    os.remove(item)
+                except OSError as e:
+                    print(f"Error removing file {item}: {e}")
+        else:
+            print(f"Excluded item not found (skipping): {item}")
 
+    for dirname, dirnames, filenames in os.walk("."):
         if "index.html" in filenames:
             print("Skipping  : " + dirname + "/index.html already exists")
         else:
