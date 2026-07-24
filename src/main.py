@@ -56,6 +56,9 @@ def main():
             print(f"Excluded item not found (skipping): {item}")
 
     for dirname, dirnames, filenames in os.walk("."):
+        # Prevent os.walk from entering or listing excluded directories like .git
+        dirnames[:] = [d for d in dirnames if d not in EXCLUDE_LIST and not d.startswith('.git')]
+        filenames[:] = [f for f in filenames if f not in EXCLUDE_LIST]
         if "index.html" in filenames:
             print("Skipping  : " + dirname + "/index.html already exists")
         else:
