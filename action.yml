@@ -19,7 +19,7 @@ inputs:
   exclude:
     description: 'Comma-separated list of files and directories to ignore'
     required: false
-    default: '.git, .gitignore'
+    default: '.git,.gitignore'
   site_name:
     description: 'The name of the site'
     required: false
