@@ -24,6 +24,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v7
+        with:
+          fetch-depth: 0  # IMPORTANT: Fetches full history so git log can find real timestamps
 
       - name: Generate and Deploy Directory Listings
         uses: pranabdas/directory-listing@v1

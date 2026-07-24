@@ -73,7 +73,7 @@ runs:
         npx -y @tailwindcss/cli -i _tailwind.css -o main.css --minify
 
         # Hash the output file
-        CSS_HASH=$(md5sum main.css | cut -d ' ' -f 1)
+        CSS_HASH=$(md5sum main.css | cut -c 1-6)
         CSS_FILENAME="main-${CSS_HASH}.css"
 
         # Move the hashed file into the target folder inside the user's workspace
