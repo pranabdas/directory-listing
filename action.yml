@@ -17,9 +17,9 @@ inputs:
     required: false
     default: ''
   exclude:
-    description: 'Comma-separated list of files and directories to ignore'
+    description: 'Comma-separated list of files and directories to delete from deploy branch. DO NOT included `.git` here, anything stating with `.git` is not listed.'
     required: false
-    default: '.git,.gitignore'
+    default: '.github,.gitignore'
   site_name:
     description: 'The name of the site'
     required: false
