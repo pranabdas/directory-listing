@@ -103,6 +103,9 @@ runs:
         export BASE_URL="${INPUT_BASE_URL:-${REPO_NAME}}"
         TARGET_DIR="$GITHUB_WORKSPACE/${{ inputs.folder }}"
 
+        # Remove stale listings from a previous deploy so directories are regenerated
+        find "${TARGET_DIR}" -name 'index.html' -type f -delete
+
         # 1. Run main.py FIRST (Generates index.html files across directories)
         python ${{ github.action_path }}/src/main.py "${TARGET_DIR}"
 
