@@ -36,15 +36,19 @@ jobs:
 
 ### Deploy to an External Repository
 
+Provide a personal access token with write access to the target repository. When
+`personal_token` is set, the action automatically suppresses `github_token` so
+the deploy action uses the personal token.
+
 ```yaml
 - name: Generate and Deploy Directory Listings
-        uses: pranabdas/directory-listing@v1
-        with:
-          folder: .
-          exclude: '.git,.github,_config.yml'
-          personal_token: ${{ secrets.DEPLOY_KEY_DRIVE }}
-          external_repository: pranabdas/drive
-          publish_branch: main
+  uses: pranabdas/directory-listing@v1
+  with:
+    folder: .
+    exclude: '.git,.github,_config.yml'
+    personal_token: ${{ secrets.DEPLOY_KEY_DRIVE }}
+    external_repository: pranabdas/drive
+    publish_branch: main
 ```
 
 ### Action Inputs (Options)
@@ -57,7 +61,7 @@ jobs:
 | `base_url` | The base path for the directory | false | `<repository_name>` |
 | `site_name` | The name of the site | false | `""` (Empty string) |
 | `footer_text` | Text to display in the footer (Supports `{year}`) | false | `Copyright &copy; {year}. Built with <a href="https://github.com/pranabdas/directory-listing" target="_blank">github.com/pranabdas/directory-listing</a>.` |
-| `github_token` | `GITHUB_TOKEN` for same-repo deployment | false | `${{ github.token }}` |
+| `github_token` | `GITHUB_TOKEN` for same-repo deployment; ignored when `personal_token` is set | false | `${{ github.token }}` |
 | `personal_token` | Personal access token for external repository deployment | false | `""` (Empty string) |
 | `publish_dir` | Directory to publish | false | `.` |
 | `external_repository` | External repository to deploy to (e.g., `username/repo`) | false | `""` (Empty string) |

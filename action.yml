@@ -31,7 +31,7 @@ inputs:
 
 # --- DEPLOYMENT INPUTS ---
   github_token:
-    description: 'GITHUB_TOKEN for same-repo deployment'
+    description: 'GITHUB_TOKEN for same-repo deployment; ignored when personal_token is set'
     required: false
     default: ${{ github.token }}
   personal_token:
@@ -200,7 +200,7 @@ runs:
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453 # v4.1.0
       with:
-        github_token: ${{ inputs.github_token }}
+        github_token: ${{ inputs.personal_token == '' && inputs.github_token || '' }}
         personal_token: ${{ inputs.personal_token }}
         publish_dir: ${{ inputs.folder }}/_site
         external_repository: ${{ inputs.external_repository }}
