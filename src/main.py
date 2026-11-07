@@ -156,7 +156,7 @@ def get_template_head(dirname, SITE_URL, BASE_URL):
         head = file.read()
 
     if BASE_URL == '.' or BASE_URL == '':
-        ABS_URL = ''
+        ABS_URL = '/'
     else:
         clean_base = BASE_URL.strip('/')
         ABS_URL = f"/{clean_base}/" if clean_base else ''
