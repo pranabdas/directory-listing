@@ -31,11 +31,11 @@ inputs:
 
 # --- DEPLOYMENT INPUTS ---
   github_token:
-    description: 'GITHUB_TOKEN for same-repo deployment; ignored when personal_token is set'
+    description: 'GITHUB_TOKEN for same-repo deployment; ignored for external deployments or when personal_token is set'
     required: false
     default: ${{ github.token }}
   personal_token:
-    description: 'Personal access token for external repository deployment'
+    description: 'Personal access token; required for external repository deployment'
     required: false
     default: ''
   publish_dir:
@@ -58,6 +58,13 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Validate deployment credentials
+      if: ${{ inputs.external_repository != '' && inputs.personal_token == '' }}
+      shell: bash
+      run: |
+        echo "::error::personal_token is required when external_repository is set."
+        exit 1
+
     - name: Set up Node.js
       uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
       with:
@@ -200,7 +207,7 @@ runs:
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453 # v4.1.0
       with:
-        github_token: ${{ inputs.personal_token == '' && inputs.github_token || '' }}
+        github_token: ${{ inputs.external_repository == '' && inputs.personal_token == '' && inputs.github_token || '' }}
         personal_token: ${{ inputs.personal_token }}
         publish_dir: ${{ inputs.folder }}/_site
         external_repository: ${{ inputs.external_repository }}
