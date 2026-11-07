@@ -62,7 +62,7 @@ present; set `github_token: ""` to use `personal_token` instead.
 | `folder` | The target directory to process | false | `.` |
 | `exclude` | Comma-separated list of files and directories to remove from deployment; `.git` directories are automatically skipped | false | `.github,.gitignore` |
 | `site_url` | The base URL for the site | false | `<repository_owner>.github.io` |
-| `base_url` | The base path for the directory | false | `<repository_name>` |
+| `base_url` | The base path for the site (use `.` for a site hosted at the domain root, such as Netlify) | false | `<repository_name>` |
 | `site_name` | The name of the site | false | `""` (Empty string) |
 | `footer_text` | Text to display in the footer (Supports `{year}`) | false | `Copyright &copy; {year}. Built with <a href="https://github.com/pranabdas/directory-listing" target="_blank">github.com/pranabdas/directory-listing</a>.` |
 | `github_token` | Token for same-repo deployment; ignored for external deployments | false | `${{ github.token }}` |
