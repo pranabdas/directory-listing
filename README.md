@@ -31,10 +31,13 @@ jobs:
         uses: pranabdas/directory-listing@v1
         with:
           folder: .
-          exclude: '.git,.github,_config.yml'
+          exclude: '.github,_config.yml'
 ```
 
 ### Deploy to an External Repository
+
+`.git` directories are automatically skipped, so do not include `.git` in
+`exclude`.
 
 Set `external_repository` and provide a personal access token with write access
 to the target repository. External deployments require `personal_token` and do
@@ -46,7 +49,7 @@ present; set `github_token: ""` to use `personal_token` instead.
   uses: pranabdas/directory-listing@v1
   with:
     folder: .
-    exclude: '.git,.github,_config.yml'
+    exclude: '.github,_config.yml'
     personal_token: ${{ secrets.DEPLOY_KEY_DRIVE }}
     external_repository: pranabdas/drive
     publish_branch: main
@@ -57,7 +60,7 @@ present; set `github_token: ""` to use `personal_token` instead.
 | Input | Description | Required | Default |
 | :--- | :--- | :--- | :--- |
 | `folder` | The target directory to process | false | `.` |
-| `exclude` | Comma-separated list of files and directories to ignore | false | `.git` |
+| `exclude` | Comma-separated list of files and directories to remove from deployment; `.git` directories are automatically skipped | false | `.github,.gitignore` |
 | `site_url` | The base URL for the site | false | `<repository_owner>.github.io` |
 | `base_url` | The base path for the directory | false | `<repository_name>` |
 | `site_name` | The name of the site | false | `""` (Empty string) |
