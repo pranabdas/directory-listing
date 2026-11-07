@@ -16,8 +16,8 @@ for (const [externalRepository, personalToken, githubToken, expected] of [
   ['', '', 'built-in-token', 'built-in-token'],
   ['', '', 'custom-token', 'custom-token'],
   ['', '', '', ''],
-  ['', 'personal-token', 'built-in-token', ''],
-  ['', 'personal-token', 'custom-token', ''],
+  ['', 'personal-token', 'built-in-token', 'built-in-token'],
+  ['', 'personal-token', 'custom-token', 'custom-token'],
   ['', 'personal-token', '', ''],
   ['owner/repo', 'personal-token', 'built-in-token', ''],
   ['owner/repo', 'personal-token', 'custom-token', ''],
@@ -51,6 +51,21 @@ test('external deployments without a personal token fail early', () => {
   assert.match(validation, /exit 1/);
 });
 
-test('deploy step forwards the personal token', () => {
-  assert.match(deployStep, /^\s+personal_token:\s+\$\{\{\s*inputs\.personal_token\s*\}\}/m);
+test('deploy step selects the personal token for external deployments or as a fallback', () => {
+  const personalMatch = deployStep.match(/^\s+personal_token:\s+\$\{\{\s*(.*?)\s*\}\}/m);
+  assert.ok(personalMatch, 'deploy step must pass a personal_token expression');
+  for (const [externalRepository, personalToken, githubToken, expected] of [
+    ['', '', 'built-in-token', ''],
+    ['', 'personal-token', 'built-in-token', ''],
+    ['', 'personal-token', 'custom-token', ''],
+    ['', 'personal-token', '', 'personal-token'],
+    ['', '', '', ''],
+    ['owner/repo', 'personal-token', 'built-in-token', 'personal-token'],
+    ['owner/repo', 'personal-token', '', 'personal-token'],
+    ['owner/repo', '', 'built-in-token', ''],
+  ]) {
+    assert.equal(vm.runInNewContext(personalMatch[1], {
+      inputs: {external_repository: externalRepository, personal_token: personalToken, github_token: githubToken},
+    }), expected);
+  }
 });

@@ -38,8 +38,8 @@ jobs:
 
 Set `external_repository` and provide a personal access token with write access
 to the target repository. External deployments require `personal_token` and do
-not use `github_token`. A supplied `personal_token` also takes precedence for
-same-repository deployments.
+not use `github_token`. Same-repository deployments use `github_token` when
+present; set `github_token: ""` to use `personal_token` instead.
 
 ```yaml
 - name: Generate and Deploy Directory Listings
@@ -62,8 +62,8 @@ same-repository deployments.
 | `base_url` | The base path for the directory | false | `<repository_name>` |
 | `site_name` | The name of the site | false | `""` (Empty string) |
 | `footer_text` | Text to display in the footer (Supports `{year}`) | false | `Copyright &copy; {year}. Built with <a href="https://github.com/pranabdas/directory-listing" target="_blank">github.com/pranabdas/directory-listing</a>.` |
-| `github_token` | `GITHUB_TOKEN` for same-repo deployment; ignored for external deployments or when `personal_token` is set | false | `${{ github.token }}` |
-| `personal_token` | Personal access token; required when `external_repository` is set | false | `""` (Empty string) |
+| `github_token` | Token for same-repo deployment; ignored for external deployments | false | `${{ github.token }}` |
+| `personal_token` | Required for external deployments; used for same-repo deployments only when `github_token` is empty | false | `""` (Empty string) |
 | `publish_dir` | Directory to publish | false | `.` |
 | `external_repository` | External repository to deploy to (e.g., `username/repo`) | false | `""` (Empty string) |
 | `publish_branch` | Branch to deploy to | false | `gh-pages` |
